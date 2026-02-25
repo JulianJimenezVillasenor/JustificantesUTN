@@ -4,34 +4,30 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LoginController extends Controller
 {
     public function login(Request $request)
     {
-        $email = $request->input('email');
-        $password = $request->input('password');
+        $credentials = $request->only('email', 'password');
 
-        // SIMULACIÓN DE USUARIOS
-        $usuarios = [
-            ['email' => 'docente@utnay.edu.mx', 'pass' => '123', 'role' => 'docente'],
-            ['email' => 'tutor@utnay.edu.mx',   'pass' => '123', 'role' => 'tutor'],
-            ['email' => 'alumno@utnay.edu.mx',  'pass' => '123', 'role' => 'alumno'],
-        ];
+        // Intentar autenticar con la tabla 'users'
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
 
-        foreach ($usuarios as $user) {
-            if ($user['email'] === $email && $user['pass'] === $password) {
-                return response()->json([
-                    'success' => true,
-                    'redirect' => route($user['role']),
-                    'role' => ucfirst($user['role'])
-                ]);
-            }
+            return response()->json([
+                'success' => true,
+                'role' => ucfirst($user->rol),
+                // Redirige según el nombre de la ruta (alumno.index, etc)
+                'redirect' => route($user->rol . '.index')
+            ]);
         }
 
         return response()->json([
             'success' => false,
-            'message' => 'Acceso denegado. Verifica tus datos.'
+            'message' => 'Las credenciales no coinciden con nuestros registros.'
         ], 401);
     }
 }
