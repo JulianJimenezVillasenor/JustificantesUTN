@@ -5,45 +5,49 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 
 class UsuarioSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        DB::table('users')->insert([
-            // Usuario Alumno
+        $users = [
             [
-                'name'     => 'Julian Jimenez',
-                'email'    => 'alumno@utnay.edu.mx',
+                'name' => 'Julian Jimenez',
+                'email' => 'alumno@utnay.edu.mx',
                 'password' => Hash::make('123'),
-                'rol'      => 'alumno',
-                'grupo'    => 'DSM-52',
-                'created_at' => now(),
+                'role' => 'alumno',
             ],
-            // Usuario Tutor
             [
-                'name'     => 'Maestro de Prueba',
-                'email'    => 'tutor@utnay.edu.mx',
+                'name' => 'Maestro de Prueba',
+                'email' => 'tutor@utnay.edu.mx',
                 'password' => Hash::make('123'),
-                'rol'      => 'tutor',
-                'grupo'    => null,
-                'created_at' => now(),
+                'role' => 'tutor',
             ],
-            // Usuario Docente
             [
-                'name'     => 'Docente de Sistemas',
-                'email'    => 'docente@utnay.edu.mx',
+                'name' => 'Docente de Sistemas',
+                'email' => 'docente@utnay.edu.mx',
                 'password' => Hash::make('123'),
-                'rol'      => 'docente',
-                'grupo'    => null,
-                'created_at' => now(),
+                'role' => 'docente',
             ],
-        ]);
+            [
+                'name' => 'Administrador',
+                'email' => 'admin@utnay.edu.mx',
+                'password' => Hash::make('123'),
+                'role' => 'admin',
+            ],
+            [
+                'name' => 'Dirección',
+                'email' => 'direccion@utnay.edu.mx',
+                'password' => Hash::make('123'),
+                'role' => 'direccion',
+            ],
+        ];
+
+        foreach ($users as $userData) {
+            DB::table('users')->updateOrInsert(
+                ['email' => $userData['email']],
+                $userData
+            );
+        }
     }
 }

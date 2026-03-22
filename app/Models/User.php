@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -41,4 +42,30 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    // Relaciones
+    public function tutor()
+    {
+        return $this->belongsTo(User::class, 'tutor_id');
+    }
+
+    public function alumnos()
+    {
+        return $this->hasMany(User::class, 'tutor_id');
+    }
+
+    public function docentesAsignados()
+    {
+        return $this->belongsToMany(User::class, 'docente_alumno', 'alumno_id', 'docente_id')->withPivot('materia');
+    }
+
+    public function alumnosAsignados()
+    {
+        return $this->belongsToMany(User::class, 'docente_alumno', 'docente_id', 'alumno_id')->withPivot('materia');
+    }
+
+    public function justificantes()
+    {
+        return $this->hasMany(Justificante::class);
+    }
 }

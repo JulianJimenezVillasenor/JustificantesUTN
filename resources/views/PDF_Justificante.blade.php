@@ -5,12 +5,12 @@
     <style>
         /* Dimensiones tipo Carta */
         @page { size: letter; margin: 0; }
-        body { 
-            font-family: 'Helvetica', 'Arial', sans-serif; 
-            background-color: #f4f4f4; 
-            padding: 30px; 
-            display: flex; 
-            justify-content: center; 
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
         }
 
         .document-page {
@@ -32,30 +32,30 @@
             position: relative; /* Para que el logo no desplace el centro */
         }
 
-        .header-logo { 
+        .header-logo {
             position: absolute; /* Sacamos el logo del flujo para que no afecte el centro */
             top: 0;
             left: 0;
         }
 
-        .header-text { 
+        .header-text {
             width: 100%;
             text-align: center; /* Ahora el centro es el centro real de la página */
             color: #004d3d;
         }
 
-        .header-text h1 { 
-            margin: 0; 
-            font-size: 19px; 
-            text-transform: uppercase; 
+        .header-text h1 {
+            margin: 0;
+            font-size: 19px;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 900;
         }
 
-        .header-text p { 
-            margin: 1px 0; 
-            font-size: 12px; 
-            font-weight: 600; 
+        .header-text p {
+            margin: 1px 0;
+            font-size: 12px;
+            font-weight: 600;
             line-height: 1.2;
         }
 

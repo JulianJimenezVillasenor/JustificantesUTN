@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\JustificanteController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DireccionController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -71,25 +73,25 @@ Route::post('/login-check', [LoginController::class, 'login'])->name('login.chec
 
 // Vistas por Rol
 // NOTA: Cambiamos la ruta de alumno para que use el Controlador y cargue los datos de HeidiSQL
-Route::get('/alumno', [JustificanteController::class, 'index'])->name('alumno.index');
+Route::get('/alumno', [JustificanteController::class, 'index'])->middleware('role:alumno')->name('alumno.index');
 
 // Panel principal del tutor (con buscador)
-Route::get('/tutor', [JustificanteController::class, 'indexTutor'])->name('tutor.index');
+Route::get('/tutor', [JustificanteController::class, 'indexTutor'])->middleware('role:tutor')->name('tutor.index');
 
 // Acción de Aceptar o Rechazar
-Route::post('/tutor/update/{id}', [JustificanteController::class, 'updateStatus'])->name('tutor.update');
+Route::post('/tutor/update/{id}', [JustificanteController::class, 'updateStatus'])->middleware('role:tutor')->name('tutor.update');
 
 // Vista del panel docente
-Route::get('/docente', [JustificanteController::class, 'indexDocente'])->name('docente.index');
+Route::get('/docente', [JustificanteController::class, 'indexDocente'])->middleware('role:docente')->name('docente.index');
 
 // Acción de firmar (POST)
-Route::post('/docente/firmar/{id}', [JustificanteController::class, 'firmarDocente'])->name('docente.firmar');
+Route::post('/docente/firmar/{id}', [JustificanteController::class, 'firmarDocente'])->middleware('role:docente')->name('docente.firmar');
 
 // Guardar Justificante
 Route::post('/enviar-justificante', [JustificanteController::class, 'store'])->name('justificantes.store');
 
 // Ruta para visualizar el PDF generado
-Route::get('/justificante/pdf/{id}', [JustificanteController::class, 'verPDF'])->name('justificantes.pdf');
+Route::get('/justificante/pdf/{id}', [JustificanteController::class, 'verPDF'])->middleware('auth')->name('justificantes.pdf');
 
 // Ruta pública para el escaneo del QR (Guardia)
 Route::get('/validar/{id}', [JustificanteController::class, 'validarPublico'])->name('validar.publico');
@@ -98,3 +100,12 @@ Route::get('/validar/{id}', [JustificanteController::class, 'validarPublico'])->
 Route::get('/logout', function () {
     return redirect('/');
 })->name('logout');
+
+// Rutas para Administrador
+Route::get('/admin', [AdminController::class, 'index'])->middleware('role:admin')->name('admin.index');
+Route::post('/admin/create-user', [AdminController::class, 'createUser'])->middleware('role:admin')->name('admin.createUser');
+Route::get('/admin/generate-report', [AdminController::class, 'generateReport'])->middleware('role:admin')->name('admin.generateReport');
+
+// Rutas para Dirección
+Route::get('/direccion', [DireccionController::class, 'index'])->middleware('role:direccion')->name('direccion.index');
+Route::get('/direccion/reports', [DireccionController::class, 'viewReports'])->middleware('role:direccion')->name('direccion.viewReports');

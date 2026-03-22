@@ -1,19 +1,27 @@
 @extends('Plantilla')
 
 @section('menu')
-    <ul class="flex justify-between items-center w-full px-6 text-white">
-        <li class="text-sm italic">Sesión activa: Alumno - {{ Auth::user()->name ?? 'Jiménez Villaseñor Julián' }}</li>
-        <li>
-            <a href="{{ route('logout') }}" class="bg-red-500 hover:bg-red-700 px-3 py-1 rounded transition-colors shadow-sm">
-                Cerrar Sesión
-            </a>
-        </li>
-    </ul>
+<div class="flex items-center gap-4 px-4 py-1 bg-white/10 rounded-2xl border border-white/5 backdrop-blur-sm">
+    <div class="flex flex-col items-end border-r border-white/20 pr-4 hidden sm:flex">
+        <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-300 leading-none">Sesión Activa</span>
+        <span class="text-white text-xs font-semibold">
+            <!--{{ Auth::user('alumno')->name ?? 'Jiménez Villaseñor Julián' }}-->
+            {{ Auth::user('alumno')->name ?? 'Alumno' }}
+        </span>
+    </div>
+
+
+    <a href="{{ route('logout') }}"
+            class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase px-4 py-2 rounded-xl transition-all shadow-md hover:scale-105 active:scale-95">
+        <i class="ph ph-power-bold text-sm"></i>
+        <span>Cerrar Sesión</span>
+    </a>
+</div>
 @endsection
 
 @section('content')
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-    
+
     <div class="md:col-span-1 space-y-4">
         <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-[#004d3d]">
             <h2 class="text-lg font-bold mb-4 text-[#004d3d]">Nueva Solicitud</h2>
@@ -36,9 +44,50 @@
                     <textarea name="motivo" class="w-full border rounded p-2 text-sm" rows="3" placeholder="Explicación breve..."></textarea>
                 </div>
                 <div>
+                    <!-- Original
                     <label class="block text-xs font-bold uppercase text-gray-500">Evidencia (PDF/JPG)</label>
                     <input type="file" name="evidencia" class="w-full text-xs">
-                </div>
+                    -->
+                    <label class="block text-xs font-bold uppercase text-gray-500">Evidencia (PDF o JPG - Máx 5MB)</label>
+                    <input type="file"
+                        name="evidencia"
+                        id="evidencia_input"
+                        accept=".pdf, .jpg, .jpeg, .png"
+                        class="w-full text-xs border p-2 rounded"
+                        required>
+                    <p id="error-msg" class="text-red-500 text-[10px] mt-1 hidden font-bold"></p>
+                </div> <!-- div original-->
+
+                <!-- scrip nuevo -->
+                    <script>
+                    document.getElementById('evidencia_input').addEventListener('change', function() {
+                        const file = this.files[0];
+                        const errorMsg = document.getElementById('error-msg');
+                        const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+
+                        if (file) {
+                            // Validar tamaño
+                            if (file.size > maxSize) {
+                                errorMsg.innerText = " El archivo supera los 5MB. Elige uno más pequeño.";
+                                errorMsg.classList.remove('hidden');
+                                this.value = ''; // Limpiar el input
+                                return;
+                            }
+
+                            // Validar extensión (extra seguridad en frontend)
+                            const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf)$/i;
+                            if (!allowedExtensions.exec(this.value)) {
+                                errorMsg.innerText = " Solo se permiten archivos PDF, JPG o PNG.";
+                                errorMsg.classList.remove('hidden');
+                                this.value = '';
+                                return;
+                            }
+
+                            errorMsg.classList.add('hidden');
+                        }
+                    });
+                    </script>
+                <!-- fin scrip nuevo-->
                 <button type="submit" class="w-full bg-[#004d3d] text-white py-2 rounded font-bold hover:bg-[#00362b] transition">
                     Enviar Solicitud
                 </button>
@@ -91,7 +140,7 @@
                         <td class="px-6 py-4">{{ date('d/m/Y', strtotime($j->fecha)) }}</td>
                         <td class="px-6 py-4"><span class="font-semibold">{{ $j->tipo_falta }}</span></td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 rounded-full text-[10px] font-bold 
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold
                                 {{ $j->status == 'PENDIENTE' ? 'bg-yellow-100 text-yellow-700' : ($j->status == 'ACEPTADO' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700') }}">
                                 {{ $j->status }}
                             </span>

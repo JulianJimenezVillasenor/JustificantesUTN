@@ -1,19 +1,48 @@
 @extends('Plantilla')
 
 @section('menu')
-    <ul class="flex justify-between items-center w-full px-6">
-        <li class="text-sm">
-            <span class="font-bold text-[#004d3d]">Docente:</span> Ing. Julian Jimenez Villaseñor
-            <span class="ml-4 bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[10px] font-black animate-pulse">
-                {{ $justificantes->where('firma_docente', false)->count() }} PENDIENTES POR FIRMAR
-            </span>
+    <nav style="background-color: var(--ut-dark-green);" class="w-full px-6 py-3 shadow-lg border-b border-white/10 backdrop-blur-md">
+    <ul class="flex justify-between items-center w-full max-w-7xl mx-auto">
+
+        <li class="flex items-center gap-6">
+            <div class="flex flex-col border-l-2 border-emerald-400 pl-4">
+                <span class="text-[10px] uppercase font-bold tracking-[0.2em] text-emerald-300/80 leading-none">Sesión Docente</span>
+                <span class="text-white text-sm font-semibold mt-1">
+                    Ing. Julian Jimenez Villaseñor
+                </span>
+            </div>
+
+            @if($justificantes->where('firma_docente', false)->count() > 0)
+                <div class="flex items-center gap-2 bg-white/10 border border-white/10 px-3 py-1.5 rounded-2xl backdrop-blur-sm animate-pulse">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                    <span class="text-amber-200 text-[10px] font-black uppercase tracking-wider">
+                        {{ $justificantes->where('firma_docente', false)->count() }} Pendientes por firmar
+                    </span>
+                </div>
+            @endif
         </li>
+
         <li>
-            <a href="{{ route('logout') }}" class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded transition-colors shadow-sm text-sm">
-                Cerrar Sesión
-            </a>
+            <div class="flex items-center gap-4 px-3 py-1 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <div class="flex flex-col items-end border-r border-white/20 pr-4 hidden sm:flex">
+                    <span class="text-[9px] uppercase font-bold tracking-widest text-emerald-300/60 leading-none">Estado</span>
+                    <span class="text-white text-[11px] font-medium opacity-90">Activo</span>
+                </div>
+
+                <a href="{{ route('logout') }}"
+                   class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white text-[11px] font-black uppercase px-5 py-2 rounded-xl transition-all shadow-lg hover:scale-105 active:scale-95 border border-red-400/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Cerrar Sesión</span>
+                </a>
+            </div>
         </li>
     </ul>
+</nav>
 @endsection
 
 @section('content')

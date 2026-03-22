@@ -1,29 +1,50 @@
 @extends('Plantilla')
 
 @section('menu')
-    <ul class="flex justify-between items-center w-full px-6">
-        <li class="text-sm italic text-white/80">Panel de Control: Tutor Académico</li>
+<nav style="background-color: var(--ut-dark-green);" class="w-full px-6 py-3 shadow-lg border-b border-white/10">
+    <ul class="flex justify-between items-center w-full max-w-7xl mx-auto">
+
+        <li class="flex items-center gap-4">
+            <div class="flex flex-col border-l-2 border-emerald-400 pl-4">
+                <span class="text-[10px] uppercase font-bold tracking-[0.2em] text-emerald-300 leading-none">Sistema de Tutorías</span>
+                <span class="text-white text-sm font-semibold mt-1 uppercase tracking-tight">
+                    Panel de Control: <span class="font-normal text-emerald-50/80">Tutor Académico</span>
+                </span>
+            </div>
+        </li>
+
         <li>
-            <a href="{{ route('logout') }}"
-            class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-lg transition-all shadow-sm font-semibold">
-            Cerrar Sesión
-            </a>
+            <div class="flex items-center gap-4 px-3 py-1 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <div class="hidden md:flex flex-col items-end border-r border-white/20 pr-4">
+                    <span class="text-[9px] uppercase font-black tracking-widest text-emerald-300/70 leading-none">Conectado</span>
+                    <span class="text-white text-[10px] font-bold opacity-80 italic">Activo</span>
+                </div>
+
+                <a href="{{ route('logout') }}"
+                    class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white text-[11px] font-black uppercase px-4 py-2 rounded-xl transition-all shadow-lg hover:scale-105 active:scale-95 border border-red-400/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Cerrar Sesión</span>
+                </a>
+            </div>
         </li>
     </ul>
+</nav>
 @endsection
 
 @section('content')
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 text-sm">
-    
+
     <div class="lg:col-span-3 space-y-6">
-        
+
         <form action="{{ route('tutor.index') }}" method="GET" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-3 items-center">
             <div class="relative flex-1">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                     <i class="ph ph-magnifying-glass text-lg"></i>
                 </span>
-                <input type="text" name="buscar" value="{{ request('buscar') }}" 
-                    placeholder="Buscar por Folio, Tipo de falta o Motivo..." 
+                <input type="text" name="buscar" value="{{ request('buscar') }}"
+                    placeholder="Buscar por Folio, Tipo de falta o Motivo..."
                     class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#004d3d] focus:border-transparent outline-none transition-all">
             </div>
             <button type="submit" class="bg-[#004d3d] text-white px-6 py-2.5 rounded-xl font-bold hover:bg-[#00362b] transition-colors shadow-sm">
@@ -39,7 +60,7 @@
         <div class="space-y-4">
             @forelse($justificantes as $j)
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative hover:border-[#004d3d]/30 transition-all group">
-                
+
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
@@ -80,8 +101,8 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <a href="{{ asset('storage/' . $j->evidencia_path) }}" 
-                        target="_blank" 
+                    <a href="{{ asset('storage/' . $j->evidencia_path) }}"
+                        target="_blank"
                         class="flex items-center gap-2 text-[#004d3d] font-bold hover:text-green-700 transition-colors group/link">
                         <div class="p-2 bg-green-50 rounded-lg group-hover/link:bg-green-100 transition-colors">
                             <i class="ph ph-eye text-xl"></i>
