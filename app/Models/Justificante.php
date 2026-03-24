@@ -9,7 +9,7 @@ class Justificante extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'tipo_falta', 'fecha', 'motivo', 'status', 'evidencia_path', 'tutor_id', 'firma_docente', 'fecha_firma_docente'];
+    protected $fillable = ['user_id', 'tipo_falta', 'tipo_justificante', 'fecha', 'horas', 'motivo', 'tipo_comprobante', 'evidencia_path', 'status', 'tutor_id', 'firma_docente', 'fecha_firma_docente'];
 
     public function user()
     {
@@ -24,5 +24,10 @@ class Justificante extends Model
     public function docente()
     {
         return $this->belongsTo(User::class, 'firma_docente');
+    }
+
+    public function materias()
+    {
+        return $this->hasMany(JustificanteMateria::class, 'justificante_id');
     }
 }

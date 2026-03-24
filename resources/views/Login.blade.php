@@ -38,7 +38,7 @@
                             <i class="ph ph-lock-key text-xl"></i>
                         </span>
                         <input type="password" name="password" required placeholder="••••••••"
-                               class="w-full pl-10 pr-4 py-3 border-2 border-gray-100 rounded-xl outline-none focus:border-[#004d3d] transition-all text-sm">
+                            class="w-full pl-10 pr-4 py-3 border-2 border-gray-100 rounded-xl outline-none focus:border-[#004d3d] transition-all text-sm">
                     </div>
                 </div>
 

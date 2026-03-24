@@ -24,12 +24,16 @@ class JustificanteController extends Controller
         $justificante = DB::table('justificantes as j')
             ->join('users as u', 'j.user_id', '=', 'u.id')
             ->leftJoin('users as t', 'j.tutor_id', '=', 't.id') // Para traer el nombre del tutor
-            ->select('j.*', 'u.name as nombre_alumno', 'u.grupo', 't.name as nombre_tutor')
+            ->select('j.*', 'u.name as nombre_alumno', 'u.grupo', 't.name as nombre_tutor', 't.firma_path as firma_tutor')
             ->where('j.id', $id)
             ->first();
 
         if (!$justificante) {
             return redirect()->back()->with('error', 'Justificante no encontrado.');
+        }
+
+        if ($justificante->status !== 'ACEPTADO') {
+            return redirect()->back()->with('error', 'El justificante aún no ha sido autorizado por el tutor y no puede descargarse.');
         }
 
         // Opcional: Configurar Carbon en español para la fecha
@@ -53,16 +57,28 @@ class JustificanteController extends Controller
         return view('ValidarQR', compact('justificante'));
     }
 
-    //PDF
     public function descargarPDF($id)
     {
-        $justificante = DB::table('justificantes')->where('id', $id)->first();
+        $justificante = DB::table('justificantes as j')
+            ->join('users as u', 'j.user_id', '=', 'u.id')
+            ->leftJoin('users as t', 'j.tutor_id', '=', 't.id')
+            ->select('j.*', 'u.name as nombre_alumno', 'u.grupo', 't.name as nombre_tutor', 't.firma_path as firma_tutor')
+            ->where('j.id', $id)
+            ->first();
+
+        if (!$justificante) {
+            return redirect()->back()->with('error', 'Justificante no encontrado.');
+        }
+
+        if ($justificante->status !== 'ACEPTADO') {
+            return redirect()->back()->with('error', 'El justificante aún no ha sido autorizado por el tutor y no puede imprimirse.');
+        }
 
         // Generamos el PDF usando la vista que creamos arriba
-        $pdf = Pdf::loadView('pdf.justificante', compact('justificante'));
+        $pdf = Pdf::loadView('PDF_Justificante', compact('justificante'));
 
         // Retorna el PDF para visualizar o descargar
-        return $pdf->stream('Justificante_'.$justificante->id.'.pdf');
+        return $pdf->stream('Justificante_' . $justificante->id . '.pdf');
     }
 
     // Docente
@@ -70,42 +86,37 @@ class JustificanteController extends Controller
     {
         $docenteId = Auth::id();
 
-        // Obtenemos todos los justificantes aceptados por el tutor de alumnos asignados al docente
+        // Obtenemos los justificantes (por materia) aceptados por el tutor para este docente
         $justificantes = DB::table('justificantes as j')
             ->join('users as u', 'j.user_id', '=', 'u.id')
-            ->join('docente_alumno as da', 'u.id', '=', 'da.alumno_id')
-            ->where('da.docente_id', $docenteId)
+            ->join('justificante_materias as jm', 'j.id', '=', 'jm.justificante_id')
+            ->where('jm.docente_id', $docenteId)
             ->where('j.status', 'ACEPTADO')
-            ->select('j.*', 'u.name as nombre_alumno', 'u.grupo')
-            ->orderBy('j.firma_docente', 'asc')
+            ->select('j.*', 'u.name as nombre_alumno', 'u.grupo', 'jm.materia', 'jm.firma_docente as firma_materia', 'jm.id as jm_id', 'jm.fecha_firma_docente as jm_fecha_firma')
+            ->orderBy('jm.firma_docente', 'asc')
             ->orderBy('j.created_at', 'desc')
             ->get();
 
         return view('Docente', compact('justificantes'));
     }
 
-    public function firmarDocente($id)
+    public function firmarDocente($jm_id)
     {
         $docenteId = Auth::id();
 
-        // Verificar que el justificante pertenezca a un alumno asignado al docente
-        $justificante = DB::table('justificantes as j')
-            ->join('users as u', 'j.user_id', '=', 'u.id')
-            ->join('docente_alumno as da', 'u.id', '=', 'da.alumno_id')
-            ->where('j.id', $id)
-            ->where('da.docente_id', $docenteId)
-            ->first();
+        // Verificar que el registro de la materia pertenece a este docente y justificante
+        $jm = DB::table('justificante_materias')->where('id', $jm_id)->where('docente_id', $docenteId)->first();
 
-        if (!$justificante) {
-            return back()->with('error', 'No tienes permisos para firmar este justificante.');
+        if (!$jm) {
+            return back()->with('error', 'No tienes permisos para firmar esta materia.');
         }
 
-        DB::table('justificantes')->where('id', $id)->update([
+        DB::table('justificante_materias')->where('id', $jm_id)->update([
             'firma_docente' => true,
             'fecha_firma_docente' => now(),
         ]);
 
-        return back()->with('success', 'Justificante firmado correctamente.');
+        return back()->with('success', 'Materia firmada correctamente.');
     }
 
     // Tutor
@@ -121,10 +132,10 @@ class JustificanteController extends Controller
         // Lógica del buscador
         if ($request->has('buscar')) {
             $buscar = $request->buscar;
-            $query->where(function($q) use ($buscar) {
+            $query->where(function ($q) use ($buscar) {
                 $q->where('u.name', 'like', "%$buscar%")
-                ->orWhere('j.motivo', 'like', "%$buscar%")
-                ->orWhere('j.id', 'like', "%$buscar%");
+                    ->orWhere('j.motivo', 'like', "%$buscar%")
+                    ->orWhere('j.id', 'like', "%$buscar%");
             });
         }
 
@@ -155,8 +166,8 @@ class JustificanteController extends Controller
         ]);
 
         $mensaje = $request->nuevo_estatus == 'ACEPTADO'
-                ? 'Justificante aprobado. El alumno ya tiene su QR activo.'
-                : 'Justificante rechazado.';
+            ? 'Justificante aprobado. El alumno ya tiene su QR activo.'
+            : 'Justificante rechazado.';
 
         return back()->with('success', $mensaje);
     }
@@ -165,14 +176,20 @@ class JustificanteController extends Controller
     public function index()
     {
         $alumnoId = Auth::id();
-        $justificantes = DB::table('justificantes')->where('user_id', $alumnoId)->orderBy('created_at', 'desc')->get();
+        $justificantes = \App\Models\Justificante::with('materias')->where('user_id', $alumnoId)->orderBy('created_at', 'desc')->get();
+
+        // Obtener las materias asignadas al alumno
+        $materias = DB::table('docente_alumno')
+            ->where('alumno_id', $alumnoId)
+            ->select('materia', 'horario')
+            ->get();
 
         // Generar el código QR para el último justificante aceptado del alumno
         $ultimoAceptado = DB::table('justificantes')
-                            ->where('user_id', $alumnoId)
-                            ->where('status', 'ACEPTADO')
-                            ->latest()
-                            ->first();
+            ->where('user_id', $alumnoId)
+            ->where('status', 'ACEPTADO')
+            ->latest()
+            ->first();
 
         $qrCode = null;
         if ($ultimoAceptado) {
@@ -183,7 +200,7 @@ class JustificanteController extends Controller
 
         }
 
-        return view('Alumno', compact('justificantes', 'qrCode'));
+        return view('Alumno', compact('justificantes', 'qrCode', 'materias'));
     }
 
     /**
@@ -206,24 +223,66 @@ class JustificanteController extends Controller
     {
         // ... validación de archivos ...
 
-    if ($request->hasFile('evidencia')) {
-        $path = $request->file('evidencia')->store('evidencias', 'public');
-    }
+        if ($request->hasFile('evidencia')) {
+            $path = $request->file('evidencia')->store('evidencias', 'public');
+        }
 
-    // El insert debe llevar el user_id del usuario autenticado
-    DB::table('justificantes')->insert([
-        'user_id'        => Auth::id(),
-        'tipo_falta'     => $request->tipo_falta,
-        'fecha'          => $request->fecha,
-        'horas'          => 'Jornada Completa',
-        'motivo'         => $request->motivo,
-        'evidencia_path' => $path ?? null,
-        'status'         => 'PENDIENTE',
-        'created_at'     => now(),
-        'updated_at'     => now(),
-    ]);
+        $horas = null;
+        if ($request->tipo_justificante == 'Parcial' && $request->has('materias')) {
+            $horas = implode(', ', $request->materias);
+        } elseif ($request->tipo_justificante == 'Completa') {
+            $horas = 'Jornada Completa';
+        }
 
-    return back()->with('success', 'Solicitud enviada correctamente.');
+        // El insert debe llevar el user_id del usuario autenticado
+        $justificanteId = DB::table('justificantes')->insertGetId([
+            'user_id' => Auth::id(),
+            'tipo_falta' => $request->tipo_falta,
+            'tipo_justificante' => $request->tipo_justificante,
+            'fecha' => $request->fecha,
+            'horas' => $horas,
+            'motivo' => $request->motivo,
+            'evidencia_path' => $path ?? null,
+            'status' => 'PENDIENTE',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Insertar materias y asignar docentes correspondientes
+        if ($request->tipo_justificante == 'Parcial' && $request->has('materias')) {
+            foreach ($request->materias as $materiaNombre) {
+                $docenteAsignado = DB::table('docente_alumno')
+                    ->where('alumno_id', Auth::id())
+                    ->where('materia', $materiaNombre)
+                    ->first();
+
+                if ($docenteAsignado) {
+                    DB::table('justificante_materias')->insert([
+                        'justificante_id' => $justificanteId,
+                        'materia' => $materiaNombre,
+                        'docente_id' => $docenteAsignado->docente_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        } elseif ($request->tipo_justificante == 'Completa') {
+            $materiasAlumno = DB::table('docente_alumno')
+                ->where('alumno_id', Auth::id())
+                ->get();
+
+            foreach ($materiasAlumno as $asignacion) {
+                DB::table('justificante_materias')->insert([
+                    'justificante_id' => $justificanteId,
+                    'materia' => $asignacion->materia,
+                    'docente_id' => $asignacion->docente_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Solicitud enviada correctamente.');
 
     }
 

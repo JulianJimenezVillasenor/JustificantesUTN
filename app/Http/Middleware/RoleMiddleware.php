@@ -33,8 +33,13 @@ class RoleMiddleware
             $userRole = $hardcodedRoles[$user->email];
         }
 
+        // Permitir a tutores que también son docentes acceder a las rutas de docentes
+        if ($role === 'docente' && $userRole === 'tutor' && $user->es_docente) {
+            return $next($request);
+        }
+
         if (!$userRole || $userRole !== $role) {
-            abort(403, 'Acceso denegado.');
+            abort(403, "Acceso denegado. (Esperaba: {$role}, Tiene: {$userRole})");
         }
 
         return $next($request);

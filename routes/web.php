@@ -66,9 +66,13 @@ Route::get('/logout', function () {
 */
 
 // Inicio y Login
-Route::get('/', function () { return view('index'); });
+Route::get('/', function () {
+    return view('index');
+});
 
-Route::get('/login', function(){ return view('Login'); })->name('login');
+Route::get('/login', function () {
+    return view('Login');
+})->name('login');
 Route::post('/login-check', [LoginController::class, 'login'])->name('login.check');
 
 // Vistas por Rol
@@ -104,6 +108,9 @@ Route::get('/logout', function () {
 // Rutas para Administrador
 Route::get('/admin', [AdminController::class, 'index'])->middleware('role:admin')->name('admin.index');
 Route::post('/admin/create-user', [AdminController::class, 'createUser'])->middleware('role:admin')->name('admin.createUser');
+Route::get('/admin/user/{id}/edit', [AdminController::class, 'editUser'])->middleware('role:admin')->name('admin.editUser');
+Route::put('/admin/user/{id}', [AdminController::class, 'updateUser'])->middleware('role:admin')->name('admin.updateUser');
+Route::delete('/admin/user/{id}', [AdminController::class, 'destroyUser'])->middleware('role:admin')->name('admin.destroyUser');
 Route::get('/admin/generate-report', [AdminController::class, 'generateReport'])->middleware('role:admin')->name('admin.generateReport');
 
 // Rutas para Dirección

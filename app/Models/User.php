@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'grupo',
+        'es_docente',
     ];
 
     /**
@@ -68,4 +70,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(Justificante::class);
     }
+
 }
