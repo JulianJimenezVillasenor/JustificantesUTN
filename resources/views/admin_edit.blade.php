@@ -73,7 +73,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label for="grupo" class="block text-sm font-medium text-gray-700">Grupo (Opcional)</label>
-                            <input type="text" name="grupo" id="grupo" value="{{ old('grupo', $user->grupo) }}" placeholder="Ej. A, B, C..." class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
+                            <input type="text" name="grupo" id="grupo" value="{{ old('grupo', $user->grupo) }}" placeholder="Ej. 51, 52, 51IA..." class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
                         </div>
                         <div>
                             <label for="tutor_id" class="block text-sm font-medium text-gray-700">Tutor Asignado</label>

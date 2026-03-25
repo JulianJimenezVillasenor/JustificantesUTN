@@ -39,7 +39,17 @@ class JustificanteController extends Controller
         // Opcional: Configurar Carbon en español para la fecha
         \Carbon\Carbon::setLocale('es');
 
-        return view('PDF_Justificante', compact('justificante'));
+        // Obtener las materias y sus horarios correspondientes
+        $materias = DB::table('justificante_materias as jm')
+            ->leftJoin('docente_alumno as da', function($join) use ($justificante) {
+                $join->on('jm.materia', '=', 'da.materia')
+                     ->where('da.alumno_id', '=', $justificante->user_id);
+            })
+            ->where('jm.justificante_id', $id)
+            ->select('jm.materia', 'da.horario')
+            ->get();
+
+        return view('PDF_Justificante', compact('justificante', 'materias'));
     }
 
     public function validarPublico($id)
@@ -74,8 +84,18 @@ class JustificanteController extends Controller
             return redirect()->back()->with('error', 'El justificante aún no ha sido autorizado por el tutor y no puede imprimirse.');
         }
 
+        // Obtener las materias y sus horarios correspondientes
+        $materias = DB::table('justificante_materias as jm')
+            ->leftJoin('docente_alumno as da', function($join) use ($justificante) {
+                $join->on('jm.materia', '=', 'da.materia')
+                     ->where('da.alumno_id', '=', $justificante->user_id);
+            })
+            ->where('jm.justificante_id', $id)
+            ->select('jm.materia', 'da.horario')
+            ->get();
+
         // Generamos el PDF usando la vista que creamos arriba
-        $pdf = Pdf::loadView('PDF_Justificante', compact('justificante'));
+        $pdf = Pdf::loadView('PDF_Justificante', compact('justificante', 'materias'));
 
         // Retorna el PDF para visualizar o descargar
         return $pdf->stream('Justificante_' . $justificante->id . '.pdf');
@@ -331,5 +351,3 @@ class JustificanteController extends Controller
         //
     }
 }
-
-

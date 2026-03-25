@@ -218,7 +218,22 @@
             </tr>
             <tr>
                 <td class="label">HORARIO</td>
-                <td>{{ $justificante->horas ?? 'JORNADA COMPLETA' }}</td>
+                <td>
+                    @if(isset($materias) && count($materias) > 0)
+                        <ul style="margin: 0; padding-left: 15px;">
+                            @foreach($materias as $materia)
+                                <li>
+                                    {{ $materia->materia }}
+                                    @if(!empty($materia->horario))
+                                        <strong>({{ $materia->horario }})</strong>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        {{ $justificante->horas ?? 'JORNADA COMPLETA' }}
+                    @endif
+                </td>
             </tr>
         </table>
 
